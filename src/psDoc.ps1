@@ -16,6 +16,21 @@ function FixString ($in = '', [bool]$includeBreaks = $false){
     return $rtn
 }
 
+function Create-OutputDir {
+    Param(
+        [parameter(Mandatory=$true,  Position=0)]  [string]  $outputDir,
+        [parameter(Mandatory=$false, Position=1)] [boolean] $override=$false
+    )
+    
+    if ($override) {
+        Remove-Item -Path $outputDir -Recurse -Force | Out-Null; 
+    }
+
+    if (!(Test-Path -Path $outputDir)) {
+        New-Item -ItemType Directory -Path $outputDir -Force | Out-Null;
+    }
+}
+
 function Update-Progress($name, $action){
     Write-Progress -Activity "Rendering $action for $name" -CurrentOperation "Completed $progress of $totalCommands." -PercentComplete $(($progress/$totalCommands)*100)
 }
@@ -50,5 +65,6 @@ foreach ($h in $commandsHelp){
 }
 
 $totalCommands = $commandsHelp.Count
+Create-OutputDir $outputDir;
 $template = Get-Content $template -raw -force
 Invoke-Expression $template > "$outputDir\$fileName"
