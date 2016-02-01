@@ -1,34 +1,34 @@
 @"
-# $moduleName
+# $ModuleName;
 "@
-$progress = 0
-$commandsHelp | % {
-	Update-Progress $_.Name 'Documentation'
-	$progress++
+$Progress = 0;
+$CommandsHelp | % {
+	Update-Progress $_.Name 'Documentation';
+	$Progress++;
 @"
-## $(FixString($_.Name))
+## $(Convert-HTMLEntities($_.Name));
 "@
-	$synopsis = $_.synopsis.Trim()
-	$syntax = $_.syntax | out-string
-	if(-not ($synopsis -ilike "$($_.Name.Trim())*")){
-		$tmp = $synopsis
-		$synopsis = $syntax
-		$syntax = $tmp
+	$Synopsis = $_.synopsis.Trim();
+	$Syntax = $_.syntax | Out-String;
+	if (-not ($Synopsis -ilike "$($_.Name.Trim())*")) {
+		$Tmp = $Synopsis;
+		$Synopsis = $Syntax;
+		$Syntax = $Tmp;
 @"	
 ### Synopsis
-$(FixString($syntax))
+    $(Convert-HTMLEntities($Syntax));
 "@
 	}
 @"	
 ### Syntax
-$(FixString($synopsis))
+    $(($Synopsis));
 "@	
 
 	if (!($_.alias.Length -eq 0)) {
 @"
 ### $($_.Name) Aliases
 "@
-		$_.alias | % {
+	$_.alias | % {
 @"
  - $($_.Name)
 "@
@@ -38,7 +38,7 @@ $(FixString($synopsis))
 "@
 	}
 	
-    if($_.parameters){
+    if ($_.parameters) {
 @"
 ### Parameters
 
@@ -55,15 +55,15 @@ $(FixString($synopsis))
 	</thead>
 	<tbody>
 "@
-        $_.parameters.parameter | % {
+     $_.parameters.parameter | % {
 @"
 		<tr>
-			<td><nobr>$(FixString($_.Name))</nobr></td>
-			<td class="visible-lg visible-md">$(FixString($_.Aliases))</td>
-			<td>$(FixString(($_.Description  | out-string).Trim()) $true)</td>
-			<td class="visible-lg visible-md">$(FixString($_.Required))</td>
-			<td class="visible-lg">$(FixString($_.PipelineInput))</td>
-			<td class="visible-lg">$(FixString($_.DefaultValue))</td>
+			<td><nobr>$(Convert-HTMLEntities($_.Name))</nobr></td>
+			<td class="visible-lg visible-md">$(Convert-HTMLEntities($_.Aliases))</td>
+			<td>$(Convert-HTMLEntities(($_.Description  | Out-String).Trim()) $True)</td>
+			<td class="visible-lg visible-md">$(Convert-HTMLEntities($_.Required))</td>
+			<td class="visible-lg">$(Convert-HTMLEntities($_.PipelineInput))</td>
+			<td class="visible-lg">$(Convert-HTMLEntities($_.DefaultValue))</td>
 		</tr>
 "@
         }
@@ -72,45 +72,45 @@ $(FixString($synopsis))
 </table>			
 "@
     }
-    $inputTypes = $(FixString($_.inputTypes  | out-string))
-    if ($inputTypes.Length -gt 0 -and -not $inputTypes.Contains('inputType')) {
+    $InputTypes = $(Convert-HTMLEntities($_.inputTypes  | Out-String));
+    if ($InputTypes.Length -gt 0 -and -not $InputTypes.Contains('inputType')) {
 @"
 ### Inputs
- - $inputTypes
+ - $InputTypes;
 
 "@
 	}
-    $returnValues = $(FixString($_.returnValues  | out-string))
-    if ($returnValues.Length -gt 0 -and -not $returnValues.StartsWith("returnValue")) {
+    $ReturnValues = $(Convert-HTMLEntities($_.returnValues  | Out-String));
+    if ($ReturnValues.Length -gt 0 -and -not $ReturnValues.StartsWith("returnValue")) {
 @"
 ### Outputs
- - $returnValues
+ - $ReturnValues;
 
 "@
 	}
-    $notes = $(FixString($_.alertSet  | out-string))
-    if ($notes.Trim().Length -gt 0) {
+    $Notes = $(Convert-HTMLEntities($_.alertSet  | Out-String));
+    if ($Notes.Trim().Length -gt 0) {
 @"
 ### Note
-$notes
+$Notes;
 
 "@
 	}
-	if(($_.examples | Out-String).Trim().Length -gt 0) {
+	if (($_.examples | Out-String).Trim().Length -gt 0) {
 @"
 ### Examples
 "@
 		$_.examples.example | % {
 @"
-**$(FixString($_.title.Trim(('-',' '))))**
+**$(Convert-HTMLEntities($_.title.Trim(('-',' '))));**
 
-		$(FixString($_.code | out-string ))
+		$(Convert-HTMLEntities($_.code | Out-String));
 		
-$(FixString($_.remarks | out-string ))
+$(Convert-HTMLEntities($_.remarks | Out-String));
 "@
 		}
 	}
-	if(($_.relatedLinks | Out-String).Trim().Length -gt 0) {
+	if (($_.relatedLinks | Out-String).Trim().Length -gt 0) {
 @"
 ### Links
 
