@@ -4,7 +4,8 @@ Param (
     [Parameter(Mandatory=$False)            ] [String] $TemplateDir = "./templates",
     [Parameter(Mandatory=$False, Position=1)] [String] $Template    = "output-html.tpl",	
     [Parameter(Mandatory=$False, Position=2)] [String] $OutputDir   = './help', 
-    [Parameter(Mandatory=$False, Position=3)] [String] $FileName    = 'index.html'
+    [Parameter(Mandatory=$False, Position=3)] [String] $FileName    = 'index.html',
+    [Parameter(Mandatory=$False, Position=4)] [alias("Zip")] [Bool] $Compress = $False
 )
 
 
@@ -179,6 +180,26 @@ Function Test-IfModuleLoaded {
 #__________________________________________________________________________________
 
 
+Function Create-Archive {
+    Param (
+        [Parameter(Mandatory=$True,  Position=0)] [String] $ArchiveName,
+        [Parameter(Mandatory=$True,  Position=1)] [String] $OutputDir
+    )
+    Add-Type -Assembly System.IO.Compression.FileSystem; 
+    
+    if (Test-Path -Path $ArchiveName) {
+        Remove-Item -Path $ArchiveName;
+    
+    }
+    $CompressionLevel = [System.IO.Compression.CompressionLevel]::Optimal;
+    [System.IO.Compression.ZipFile]::CreateFromDirectory($OutputDir, 
+                                                         $ArchiveName,
+                                                         $CompressionLevel, 
+                                                         $False);
+}
+#__________________________________________________________________________________
+
+
 #
 # Main_____________________________________________________________________________ 
 #
@@ -247,6 +268,13 @@ if (Test-OutputDirPath $OutputDir) {
     # Writing generated help into output file
     $OutputFile="$OutputDir\$FileName";
     Write-Help $FormattedDataFromTemplate $OutputFile;
+
+    if ($Compress) {
+    pwd
+        $ArchiveName = "$(pwd)\$ModuleName-$(get-date -f yyyy-MM-dd_HH_mm).zip";
+        $DirToCompress = "$(pwd)\$OutputDir";
+        Create-Archive $ArchiveName $DirToCompress;
+    }
 }
 else {
     Write-Error "Unable to create $OutputDir, please check permission";
