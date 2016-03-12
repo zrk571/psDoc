@@ -1,9 +1,10 @@
 Param (
     [Parameter(Mandatory=$true,  Position=0)] [String] $ModuleName,
 	[Parameter(Mandatory=$False)            ] [String] $ModulePath,	
-    [Parameter(Mandatory=$False, Position=1)] [String] $Template   = "./templates/output-html.tpl",
-    [Parameter(Mandatory=$False, Position=2)] [String] $OutputDir  = './help', 
-    [Parameter(Mandatory=$False, Position=3)] [String] $FileName   = 'index.html'
+    [Parameter(Mandatory=$False)            ] [String] $TemplateDir = "./templates",
+    [Parameter(Mandatory=$False, Position=1)] [String] $Template    = "output-html.tpl",	
+    [Parameter(Mandatory=$False, Position=2)] [String] $OutputDir   = './help', 
+    [Parameter(Mandatory=$False, Position=3)] [String] $FileName    = 'index.html'
 )
 
 
@@ -56,6 +57,33 @@ Function Test-OutputDirPath {
     }
 
     return (Test-Path -Path $OutputDir);
+}
+#__________________________________________________________________________________
+
+
+Function Test-TemplateDirPath {
+    Param (
+        [Parameter(Mandatory=$True,  Position=0)] [String]  $TemplateDir
+    )
+    
+    if ([String]::IsNullOrEmpty($TemplateDir)) {
+        throw "Unable to retrieve template path: Null or empty No Template dir specified";
+    }
+
+    return (Test-Path -Path $TemplateDir);
+}
+#__________________________________________________________________________________
+
+Function Test-TemplatePath {
+    Param (
+        [Parameter(Mandatory=$True,  Position=0)] [String]  $TemplatePath
+    )
+    
+    if ([String]::IsNullOrEmpty($TemplatePath)) {
+        throw "Unable to retrieve template path: Null or empty No Template specified";
+    }
+
+    return (Test-Path -Path $TemplatePath);
 }
 #__________________________________________________________________________________
 
@@ -164,6 +192,18 @@ if (![String]::IsNullOrEmpty($ModulePath) -and (Test-IfModule $ModulePath)) {
         Throw "Unable to load module $ModuleName ($ModulePath)";
     }
 }
+
+# Check templates integrity
+$Template = "$TemplateDir/$Template";
+if (![String]::IsNullOrEmpty($TemplateDir) -and (Test-TemplateDirPath $TemplateDir)) {
+    if (-not (Test-TemplatePath $Template)) {
+        Throw "Unable to find specified template $Template";
+    }
+}
+else {
+       Throw "Unable to find specified template dir: $TemplateDir";
+}
+
 
 $i = 0;
 $CommandsHelp = (Get-Command -Module $moduleName) | Get-Help -Full | Where-Object {! $_.name.EndsWith('.ps1')};
