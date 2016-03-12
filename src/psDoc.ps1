@@ -1,6 +1,6 @@
 Param (
     [Parameter(Mandatory=$true,  Position=0)] [String] $ModuleName, 
-    [Parameter(Mandatory=$False, Position=1)] [String] $Template   = "./out-markdown-template.ps1",
+    [Parameter(Mandatory=$False, Position=1)] [String] $Template   = "./templates/output-html.tpl",
     [Parameter(Mandatory=$False, Position=2)] [String] $OutputDir  = './help', 
     [Parameter(Mandatory=$False, Position=3)] [String] $FileName   = 'index.html'
 )
