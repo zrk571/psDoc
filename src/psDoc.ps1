@@ -1,5 +1,6 @@
 Param (
-    [Parameter(Mandatory=$true,  Position=0)] [String] $ModuleName, 
+    [Parameter(Mandatory=$true,  Position=0)] [String] $ModuleName,
+	[Parameter(Mandatory=$False)            ] [String] $ModulePath,	
     [Parameter(Mandatory=$False, Position=1)] [String] $Template   = "./templates/output-html.tpl",
     [Parameter(Mandatory=$False, Position=2)] [String] $OutputDir  = './help', 
     [Parameter(Mandatory=$False, Position=3)] [String] $FileName   = 'index.html'
@@ -103,6 +104,67 @@ Function Format-Data {
 #__________________________________________________________________________________
 
 
+Function Import-ModuleFromPath {
+    Param (
+        [Parameter(Mandatory=$True,  Position=0)] [String] $ModulePath
+    )
+    try {
+        Import-Module -Name $ModulePath;
+    }
+    catch {
+         Write-Error "Unable to load $ModulePath, please check files";
+    }
+}
+#__________________________________________________________________________________
+
+
+Function Test-IfModule {
+    Param (
+        [Parameter(Mandatory=$True,  Position=0)] [String] $ModulePath
+    )
+    $IsModule = $False;
+    
+    if (Test-Path -Path $ModulePath) {
+        $authorizedExtensions = { ".ps1", ".psm1", ".psd1" };
+        $TmpPath = $ModulePath.ToString().ToLower();
+        if (![String]::IsNullOrEmpty($TmpPath)) {
+            foreach ($ext in $authorizedExtensions) {
+                if ($TmpPath.EndsWith($ext)) {
+                    $IsModule = $True;
+                    break;
+                }
+            }
+        }
+    }
+    echo $IsModule;
+    return $IsModule;
+}
+#__________________________________________________________________________________
+
+
+Function Test-IfModuleLoaded {
+    Param (
+        [Parameter(Mandatory=$True,  Position=0)] [String] $ModuleName
+    )
+    return !((Get-Module -Name $ModuleName) -eq $Null);
+}
+#__________________________________________________________________________________
+
+
+#
+# Main_____________________________________________________________________________ 
+#
+
+if (![String]::IsNullOrEmpty($ModulePath) -and (Test-IfModule $ModulePath)) {
+    Import-ModuleFromPath $ModulePath;
+    if (Test-IfModuleLoaded $ModuleName) {
+        Write-Host "Module $ModuleName ($ModulePath) successfully loaded";
+    }
+    else {
+        Throw "Unable to load module $ModuleName ($ModulePath)";
+    }
+}
+
 $i = 0;
 $CommandsHelp = (Get-Command -Module $moduleName) | Get-Help -Full | Where-Object {! $_.name.EndsWith('.ps1')};
 
@@ -132,12 +194,7 @@ Foreach ($H in $CommandsHelp) {
         }
     }
 }
-#__________________________________________________________________________________
 
-
-#
-# Main_____________________________________________________________________________ 
-#
 $TotalCommands = $CommandsHelp.Count;
 
 # Formatting help data from selected template
